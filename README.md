@@ -57,12 +57,16 @@ As you might expect, this 'attempts' to replicate the early Mac OS X
 operating system versions' aqua cocoa buttons using a web component. 
 As it stands currently, these aren't perfect by any stretch.
 
+![aqua-button](https://raw.githubusercontent.com/nyteshade/ne-aqua-components/refs/heads/main/images/aqua-button.png)
+
 ### `<aqua-hr>`
 
 Used as the underbar for tab groups and sometimes just to simply 
 separate elements vertically, the horizontal rule is a step up in
 my opinion as compared to the typical `<hr>` element the browser
 supplies.
+
+![aqua-hr](https://raw.githubusercontent.com/nyteshade/ne-aqua-components/refs/heads/main/images/aqua-hr.png)
 
 ### `<aqua-trafficlights>`
 
@@ -76,6 +80,8 @@ Additional capabilities provided by this component beyond rendering
 add the ability to toggle the light and change its base colors to something
 that better befits your site as well as the ability to adjust the size
 proportionally from the smaller values used by Massimo on their site.
+
+![aqua-trafficlight](https://raw.githubusercontent.com/nyteshade/ne-aqua-components/refs/heads/main/images/aqua-trafficlights.png)
 
 ## Contribution
 
