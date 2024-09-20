@@ -72,8 +72,8 @@ supplies.
 
 The traffic lights represent the close, minimize and maximize buttons 
 found in some of the later operating systems. Still very jewel like.
-Basic rendering was lifted from (Massimo Selvi's 
-CodePen)[https://codepen.io/massimoselvi/details/YGrqNg]. Credit goes to
+Basic rendering was lifted from [Massimo Selvi's 
+CodePen](https://codepen.io/massimoselvi/details/YGrqNg). Credit goes to
 him to get the glassy reflections right.
 
 Additional capabilities provided by this component beyond rendering
