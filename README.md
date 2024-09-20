@@ -8,11 +8,13 @@ I will endeavor to get these things a bit more polished (e.g. using  sematic ele
 
 ## Getting Started
 
-Point your browser using script modules at this cdn.
+Point your browser using script modules at this cdn: https://cdn.jsdelivr.net/gh/nyteshade/ne-aqua-components/src/all.js.
 
 ```html
-<script type="module" src="https://cdn.jsdelivr.net/gh/nyteshade/ne-aqua-components/src/all.js
-"></script>
+<script
+  type="module"
+  src="https://cdn.jsdelivr.net/gh/nyteshade/ne-aqua-components/src/all.js"
+></script>
 ```
 
 This will place all the components in your global space on the webpage to which it was imported. It will also expose a variable on `globalThis`, basically the same as `window` in a browser page, that tracks all the exports.
