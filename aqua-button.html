@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Aqua Button</title>
+		<style>
+			html {
+				margin: 0;
+				padding: 0;
+
+				body {
+					min-width: 98vw;
+					min-height: 98vh;
+					align-items: center;
+        	justify-content: center;
+        	background-color: darkgray;
+				}
+			}
+
+			* {
+				box-sizing: border-box;
+				scroll-behavior: smooth;
+				text-rendering: optimizeLegibility;
+				-webkit-font-smoothing: antialiased;
+			}
+
+
+
+		</style>
+		<script type="module" src="src/all.js"></script>
+	</head>
+
+	<body>
+		<div>
+			<aqua-button size="s">Small</aqua-button>
+			<aqua-button size="m">Medium</aqua-button>
+			<aqua-button size="l">Large</aqua-button>
+			<aqua-button size="xl">X-Large</aqua-button>
+			<aqua-button size="xxl">XX-Large</aqua-button>
+		</div>
+		<div>
+			<aqua-button color="Gray" size="s">Small</aqua-button>
+			<aqua-button color="Gray" size="m">Medium</aqua-button>
+			<aqua-button color="Gray" size="l">Large</aqua-button>
+			<aqua-button color="Gray" size="xl">X-Large</aqua-button>
+			<aqua-button color="Gray" size="xxl">XX-Large</aqua-button>
+		</div>
+		<aqua-hr></aqua-hr>
+		<aqua-button2></aqua-button2>
+		<aqua-hr></aqua-hr>
+    <aqua-button color="gray" handler="alert('I have been clicked')">Click Me</aqua-button>
+		<aqua-button disabled handler="alert('Disabled')">Disabled</aqua-button>
+		<glow-text style="position:absolute;right:1em;top:1em;">Is this thing on?</glow-text>
+		<aqua-hr></aqua-hr>
+		<aqua-trafficlight size="25px" color="red"></aqua-trafficlight>
+		<aqua-trafficlight size="25px" color="yellow"></aqua-trafficlight>
+		<aqua-trafficlight size="25px" color="green"></aqua-trafficlight>
+		<aqua-trafficlight size="25px" color="lightslategray"></aqua-trafficlight>
+		<aqua-trafficlight size="25px" color="#97b6ee"></aqua-trafficlight>
+	</body>
+</html>

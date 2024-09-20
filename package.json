@@ -1,0 +1,17 @@
+{
+  "name": "aqua-web-components",
+  "version": "0.0.1",
+  "description": "The beginning of some aqua web components for use in web pages",
+  "main": "src/all.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "aqua",
+    "web",
+    "components",
+    "lightweight"
+  ],
+  "author": "Brielle Harrison",
+  "license": "MIT"
+}
