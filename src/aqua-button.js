@@ -1,15 +1,17 @@
 import { WebComponentBase } from './webcomponentbase.js';
+import { Toolbelt } from './toolbelt.js';
+
+const { measureText } = Toolbelt;
 
 export class AquaButton extends WebComponentBase {
   #attributeFunction = null;
-  #instanceId = Math.random().toString(36).slice(2);
 
   constructor() {
     super();
 
     this.on('click', this.defaultHandler);
 
-    this.css = {
+    this.variables = {
       aquaBlueTextColor: 'rgb(255,255,255)',
       aquaBlueTextShadow: '0px 1px 3px rgb(0 0 0/ 50%)',
       aquaBlueTop: 'rgb(75,95,146)',
@@ -37,7 +39,6 @@ export class AquaButton extends WebComponentBase {
     }
 
     this.setColor(this.normalizedColorAttribute(true));
-    this.childNodes.forEach(child => this.slot.appendChild(child));
   }
 
   normalizedColorAttribute(overrideOriginal = false)  {
@@ -59,49 +60,50 @@ export class AquaButton extends WebComponentBase {
     return base
   }
 
-  attributeChangedCallback(name, oldValue, newValue) {
-    const { variables } = this.styleManager;
-
-    if (name.toLowerCase() === 'disabled') {
-      if (newValue !== null) {
-        this.setState("disabled", true, true);
-        this.buttonElement.classList.add('disabled');
-        this.setColor('Gray');
-      }
-      else {
-        this.setState("disabled", false, true);
-        this.buttonElement.classList.remove('disabled');
-        this.setColor(this.getState('color.original'));
-      }
-
-      return;
-    }
-
-    if (name.toLowerCase() === 'handler') {
-      if (newValue !== null)
-        this.#attributeFunction = new Function('event', newValue);
+  onDisabledChanged(_, newValue) {
+    if (newValue !== null) {
+      const command = () => this.elements.button.classList.add('disabled');
+      this.setState("disabled", true, true);
+      this.setColor('Gray');
+      if (this.isConnected)
+        command();
       else
-        this.#attributeFunction = null;
+        this.queueCommand(command);
     }
-
-    if (name.toLowerCase() === 'size') {
-      this.setSize(newValue);
+    else {
+      const command = () => this.elements.button.classList.remove('disabled');
+      this.setState("disabled", false, true);
+      this.setColor(this.getState('color.original'));
+      if (this.isConnected)
+        command();
+      else
+        this.queueCommand(command);
     }
   }
 
-  get buttonElement() {
-    return this.shadowRoot.querySelector('div.aqua-button');
+  onHandlerChanged(_, newValue) {
+    if (newValue !== null)
+      this.#attributeFunction = new Function('event', newValue);
+    else
+      this.#attributeFunction = null;
+  }
+
+  onSizeChanged(_, newValue) {
+    this.setSize(newValue);
   }
 
   connectedCallback() {
+    // Handle any queued commands and render() once
     super.connectedCallback();
 
-    const parent = this.shadowRoot.querySelector('.content');
-    const contentText = parent.innerText;
-    const { width, height } = this.measureText(contentText);
-    const { variables } = this.styleManager;
+    // Move any content added to the component's body to the
+    // shadowRoot's content span.
+    this.childNodes.forEach(child => this.elements.content.append(child));
 
-    this.setState('buttonTextHeight.original', `${height}px`, true);
+    const parent = this.elements.content;
+    const contentText = parent.innerText;
+    const { width, height } = measureText(contentText);
+    const { variables } = this.styleManager;
 
     variables.buttonTextWidth = `${width}px`;
     variables.buttonTextHeight = `${height * 1.2}px`;
@@ -111,10 +113,7 @@ export class AquaButton extends WebComponentBase {
     variables.buttonHoverTransition = 'all 0.1s ease-in-out';
 
     this.setSize(this.state.size);
-  }
-
-  get contentElement() {
-    return this.shadowRoot.querySelector('div.aqua-button span.content');
+    this.setColor(this.state.color);
   }
 
   defaultHandler(event) {
@@ -126,12 +125,15 @@ export class AquaButton extends WebComponentBase {
     }
   }
 
-  get #innerChrome() {
-    return this.shadowRoot.querySelector('div.aqua-button div.inner-chrome');
-  }
+  get elements() {
+    const query = this.shadowRoot.querySelector.bind(this.shadowRoot);
 
-  get instanceId() {
-    return this.#instanceId;
+    return {
+      get button() { return query('div.aqua-button') },
+      get content() { return query('div.aqua-button span.content') },
+      get chrome() { return query('div.aqua-button div.inner-chrome') },
+      get stylesheet() { return query('style') },
+    }
   }
 
   setColor(color = "Blue") {
@@ -139,15 +141,17 @@ export class AquaButton extends WebComponentBase {
       return;
     }
 
-    this.css = {
-      buttonTextColor: this.css[`aqua${color}TextColor`],
-      buttonTextShadow: this.css[`aqua${color}TextShadow`],
-      buttonTop: this.css[`aqua${color}Top`],
-      buttonTopBorder: this.css[`aqua${color}TopBorder`],
-      buttonBottom: this.css[`aqua${color}Bottom`],
-      buttonBottomBorder: this.css[`aqua${color}BottomBorder`],
-      buttonVerticalGradient: this.css[`aqua${color}VerticalGradient`],
-      buttonVerticalGradientBright: this.css[`aqua${color}VerticalGradientBright`],
+    const { variables } = this;
+
+    this.variables = {
+      buttonTextColor: variables[`aqua${color}TextColor`],
+      buttonTextShadow: variables[`aqua${color}TextShadow`],
+      buttonTop: variables[`aqua${color}Top`],
+      buttonTopBorder: variables[`aqua${color}TopBorder`],
+      buttonBottom: variables[`aqua${color}Bottom`],
+      buttonBottomBorder: variables[`aqua${color}BottomBorder`],
+      buttonVerticalGradient: variables[`aqua${color}VerticalGradient`],
+      buttonVerticalGradientBright: variables[`aqua${color}VerticalGradientBright`],
     }
   }
 
@@ -183,10 +187,6 @@ export class AquaButton extends WebComponentBase {
     }
     else
       variables.buttonTextHeight = 'var(--button-text-orig-height)';
-  }
-
-  get slot() {
-    return this.shadowRoot.querySelector('slot');
   }
 
   styles() {
@@ -454,15 +454,11 @@ export class AquaButton extends WebComponentBase {
     /*!css*/`
   }
 
-  get stylesheet() {
-    return this.shadowRoot.querySelector('style');
-  }
-
   template() {
     return `
       <div class="aqua-button">
 			  <div class="inner-chrome"></div>
-			  <span class="content"><slot></slot></span>
+			  <span class="content"></span>
 		  </div>
     `;
   }
@@ -476,6 +472,7 @@ export class AquaButton extends WebComponentBase {
   }
 
   static {
+    console.log('Defining <aqua-button>')
     customElements.define('aqua-button', AquaButton)
   }
 }

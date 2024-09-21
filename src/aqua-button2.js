@@ -116,7 +116,7 @@ export class AquaButton2 extends WebComponentBase {
           background-position: center calc( var(--gradoffset) - 0.75em );
         }
 
-}
+      }
 
       /*!css*/
     `

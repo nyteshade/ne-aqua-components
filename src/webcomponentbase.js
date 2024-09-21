@@ -1,4 +1,7 @@
-import { StyleManager } from './stylemanager.js';
+import { StyleManager } from './stylemanager.js'
+import { Toolbelt } from './toolbelt.js'
+
+const { camelIfKebab } = Toolbelt
 
 export class WebComponentBase extends HTMLElement {
   constructor() {
@@ -31,31 +34,31 @@ export class WebComponentBase extends HTMLElement {
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
-    this.#state.set(name, newValue);
+    this.#state.set(name, newValue)
+
+    const property = String(name).toLowerCase()
+    const localName = `on${camelIfKebab(property, true)}Changed`
+    let handler = null
+
+    if (Reflect.has(this, localName))
+      handler = this[localName].bind(this);
+    else if (this.attributeHandlers.has(property))
+      handler = this.attributeHandlers.get(property).bind(this)
+
+    if (handler) {
+      try {
+        handler(oldValue, newValue)
+      }
+      catch (ignore) {
+        console.error(ignore)
+      }
+    }
+
     this.render();
   }
 
   buildProxies() {
     const self = this;
-
-    Object.defineProperty(this, 'css', {
-      get() { return self.styleManager.variables },
-      set(value) {
-        if (value && typeof value === 'object') {
-          for (const [key, val] of Object.entries(value)) {
-            if (key in self.styleManager.variables && val === undefined) {
-              delete self.styleManager.variables[key]
-            }
-            else {
-              self.styleManager.variables[key] = val;
-            }
-          }
-        }
-        return;
-      },
-      enumerable: true,
-      configurable: true,
-    })
 
     this.state = new Proxy(this.#state, {
       deleteProperty(target, property) {
@@ -76,7 +79,7 @@ export class WebComponentBase extends HTMLElement {
     this.shadowRoot.append(this.stylesheet);
 
     this.styleManager = new StyleManager(this.stylesheet, true);
-    this.variables = this.styleManager.variables;
+    this.styleManager.applyVariablesTo(this);
   }
 
   buildDOM() {
@@ -92,6 +95,12 @@ export class WebComponentBase extends HTMLElement {
 
   connectedCallback() {
     this.attachEventListeners();
+
+    let command = null
+    while ((command = this.queuedCommands.shift())) {
+      try { command() } catch (ignore) { /* moving on */ }
+    }
+
     this.render();
   }
 
@@ -131,46 +140,8 @@ export class WebComponentBase extends HTMLElement {
     });
   }
 
-  measureText(text, options = {}) {
-    // Create a wrapper container
-    const container = document.createElement('div');
-    container.style.visibility = 'hidden';
-    container.style.overflow = 'hidden';
-    container.style.position = 'absolute';
-    container.style.width = '0';
-    container.style.height = '0';
-
-    // Create the measuring element
-    const span = document.createElement('span');
-    span.style.whiteSpace = 'pre'; // Preserve whitespace and prevent text wrapping
-    span.style.color = 'transparent'; // Prevent any visual text rendering
-
-    // Apply user-defined styles
-    Object.assign(span.style, options);
-
-    // Insert the text
-    span.textContent = text;
-
-    // Nest the span inside the container
-    container.appendChild(span);
-
-    // Capture the intended parentElement
-    const parentElement = (
-      options?.parent?.isConnected &&
-      options?.parent?.appendChild
-    ) ? options.parent : document.body;
-
-    // Append the container to the body
-    parentElement.appendChild(container);
-
-    // Measure the dimensions
-    const { width, height } = span.getBoundingClientRect();
-
-    // Clean up by removing the container
-    parentElement.removeChild(container);
-
-    // Return the dimensions
-    return { width, height };
+  get instanceId() {
+    return this.#instanceId;
   }
 
   off(eventName, selector, handler, options) {
@@ -227,7 +198,6 @@ export class WebComponentBase extends HTMLElement {
   }
 
   onSlotChange(elements) {
-    console.log('Slotted elements: ', elements);
   }
 
   patchElementMethods() {
@@ -238,6 +208,12 @@ export class WebComponentBase extends HTMLElement {
       this.#patches.set(original, this[original])
       this[`_${original}`] = this[original].bind(this);
       this[original] = this[remapped]
+    }
+  }
+
+  queueCommand(command) {
+    if (typeof command === 'function' || command instanceof Function) {
+      this.queuedCommands.push()
     }
   }
 
@@ -297,73 +273,18 @@ export class WebComponentBase extends HTMLElement {
     return this.constructor.observedAttributes;
   }
 
+  attributeHandlers = new Map()
+  queuedCommands = [];
   shadow = null;
   stylesheet = null;
 
+  #instanceId = Math.random().toString(36).slice(2);
   #listeners = new Map()
   #patches = new Map()
   #state = new Map()
 
-  static get customElementName() {
-    return 'web-component-base';
-  }
-
   static get observedAttributes() {
     return [];
-  }
-
-  static camelToKebabCase(str) {
-    return str.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
-  }
-
-  static isCamelCase(str) {
-    // Check if the string is empty or null
-    if (!str || str.length === 0) {
-      return false;
-    }
-
-    // Check if the first character is lowercase
-    if (str[0] !== str[0].toLowerCase()) {
-      return false;
-    }
-
-    // Check if the string contains any spaces
-    if (str.includes(' ')) {
-      return false;
-    }
-
-    // Check if the string contains any uppercase letters (except the first character)
-    if (!/[A-Z]/.test(str.slice(1))) {
-      return false;
-    }
-
-    // Check if the string contains any characters other than letters
-    if (!/^[a-zA-Z]+$/.test(str)) {
-      return false;
-    }
-
-    // If all checks pass, the string is in camelCase
-    return true;
-  }
-
-  static isKebabCase(str) {
-    // Regular expression to match kebab case
-    const kebabCaseRegex = /^[a-z]+(-[a-z]+)*$/;
-
-    // Test the string against the regex
-    return kebabCaseRegex.test(str);
-  }
-
-  static kebabIfCamel(str) {
-    return this.isCamelCase(str) ? this.camelToKebabCase(str) : str;
-  }
-
-  static {
-    const name = this.customElementName;
-    if (name !== 'web-component-base' && !customElements.get(name)) {
-      console.log(`registering ${this.customElementName}`)
-      customElements.define(name, this);
-    }
   }
 }
 

@@ -1,49 +1,41 @@
 import { WebComponentBase } from "./webcomponentbase.js";
 
 export class AquaTrafficLight extends WebComponentBase {
-  attributeChangedCallback(attrName, oldValue, newValue) {
-    const name = attrName.toLowerCase();
-    const nVal = String(newValue).toLowerCase()
-
-    if (name === 'color') {
-      if (newValue !== null) {
-        switch (nVal) {
-          case 'red':
-            this.color = '#f24443';
-            return;
-          case 'yellow':
-            this.color = '#f0aa5a'
-            return;
-          case 'green':
-            this.color = '#88be72'
-            return
-          default:
-            this.color = newValue;
-        }
-      }
-      else {
-        this.bulb.removeAttribute('id');
-        this.bulb.style.backgroundColor = '';
-      }
-    }
-
-    if (name === 'size') {
-      this.variables.size = newValue ?? '12px';
-    }
-  }
-
+  /**
+   * Gets the div element representing the traffic light bulb.
+   *
+   * @returns {HTMLDivElement} The div element representing the traffic light
+   *   bulb.
+   */
   get bulb() {
-    return this.shadowRoot.querySelector('div.aqua');
+    return this.shadowRoot.querySelector('div.aqua')
   }
 
+  /**
+   * Gets the current background color of the traffic light bulb.
+   *
+   * @returns {string|undefined} The current background color of the traffic
+   *   light bulb, or undefined if no color is set.
+   */
   get color() {
-    return this.bulb.style.backgroundColor || undefined;
+    return this.bulb.style.backgroundColor || undefined
   }
 
+  /**
+   * Sets the background color of the traffic light bulb.
+   *
+   * @param {string} value - The new background color for the traffic light
+   *   bulb.
+   */
   set color(value) {
-    this.bulb.style.backgroundColor = value;
+    this.bulb.style.backgroundColor = value
   }
 
+  /**
+   * Gets the credit information for the traffic light code.
+   *
+   * @returns {string} The credit information for the traffic light code.
+   */
   get credit() {
     return `
       Traffic light code taken and modified from the code pen by Massimo Selvi,
@@ -54,6 +46,51 @@ export class AquaTrafficLight extends WebComponentBase {
     `
   }
 
+  /**
+   * Handles changes to the color attribute.
+   *
+   * @param {string} _ - The old value of the color attribute (not used).
+   * @param {string} newValue - The new value of the color attribute.
+   */
+  onColorChanged(_, newValue) {
+    const nVal = String(newValue)
+
+    if (newValue !== null) {
+      switch (nVal) {
+        case 'red':
+          this.color = '#f24443'
+          return
+        case 'yellow':
+          this.color = '#f0aa5a'
+          return
+        case 'green':
+          this.color = '#88be72'
+          return
+        default:
+          this.color = newValue
+      }
+    }
+    else {
+      this.bulb.removeAttribute('id')
+      this.bulb.style.backgroundColor = ''
+    }
+  }
+
+  /**
+   * Handles changes to the size attribute.
+   *
+   * @param {string} _ - The old value of the size attribute (not used).
+   * @param {string} newValue - The new value of the size attribute.
+   */
+  onSizeChanged(_, newValue) {
+    this.variables.size = newValue ?? '12px'
+  }
+
+  /**
+   * Returns the HTML template for the traffic light component.
+   *
+   * @returns {string} The HTML template for the traffic light component.
+   */
   template() {
     return `
       <!--html-->
@@ -64,37 +101,58 @@ export class AquaTrafficLight extends WebComponentBase {
     `
   }
 
+  /**
+   * Toggles the traffic light bulb color.
+   *
+   * @param {string} [color] - The color to toggle the traffic light bulb to.
+   *   If not provided, the color will toggle between the current color and
+   *   the last color.
+   * @returns {Function} A function that can be called to toggle the traffic
+   *   light bulb color again.
+   *
+   * @example
+   * // Toggle the traffic light bulb to green
+   * const toggleGreen = trafficLight.toggle('green')
+   *
+   * // Toggle the traffic light bulb to the previous color
+   * toggleGreen()
+   */
   toggle(color) {
     switch (color) {
       case 'red':
-        color = '#f24443';
-        break;
+        color = '#f24443'
+        break
       case 'yellow':
-        color = '#f0aa5a';
-        break;
+        color = '#f0aa5a'
+        break
       case 'green':
-        color = '#88be72';
-        break;
+        color = '#88be72'
+        break
     }
 
     let newColor = color ?? this.variables.lastColor ?? '#88be72'
 
     if (this.color) {
-      this.variables.lastColor = this.color;
+      this.variables.lastColor = this.color
 
       if (this.color === newColor || !color || newColor === this.variables.lastColor)
-        this.color = '';
+        this.color = ''
       else
-        this.color = newColor;
+        this.color = newColor
     }
     else {
-      this.color = newColor;
-      this.variables.lastColor = newColor;
+      this.color = newColor
+      this.variables.lastColor = newColor
     }
 
     return () => { this.toggle(newColor) }
   }
 
+  /**
+   * Returns the CSS styles for the traffic light component.
+   *
+   * @returns {string} The CSS styles for the traffic light component.
+   */
   styles() {
     return `
       /*css*/
@@ -132,6 +190,11 @@ export class AquaTrafficLight extends WebComponentBase {
     `
   }
 
+  /**
+   * Returns the list of observed attributes for the traffic light component.
+   *
+   * @returns {string[]} The list of observed attributes.
+   */
   static get observedAttributes() {
     return ['color', 'size']
   }

@@ -7,28 +7,39 @@ export class AquaHorizontalRule extends WebComponentBase {
     this.variables.hrRadius = 'calc((var(--hr-height) / 2) + 2px)';
   }
 
-  attributeChangedCallback(attrName, oldValue, newValue) {
-    super.attributeChangedCallback(attrName, oldValue, newValue);
-    const name = attrName.toLowerCase();
+  onWidthChanged(_, newValue) {
+    this.variables.hrWidth = newValue !== null ? newValue : '100%';
+  }
 
-    if (name === 'width') {
-      this.variables.hrWidth = newValue !== null ? newValue : '100%';
+  onHeightChanged(_, newValue) {
+    this.variables.hrHeight = newValue !== null ? newValue : '6px';
+  }
+
+  onMarginChanged(_, newValue) {
+    const nValue = String(newValue).toLowerCase();
+    const parts = nValue.split(' ')
+    const bases = {
+      t: '0.3em',
+      r: '0',
+      b: '0.5em',
+      l: '0',
     }
+    const base = `${bases.t} ${bases.r} ${bases.b} ${bases.l}`
 
-    if (name === 'height') {
-      this.variables.hrHeight = newValue !== null ? newValue : '6px';
+    if (nValue === "none") {
+      this.variables.hrMargin = '0';
     }
-
-    if (name === 'margin') {
-      if (String(newValue).toLowerCase() === "none") {
-        this.variables.hrMargin = '0';
-      }
-      else if (newValue !== null && newValue !== undefined) {
-        this.variables.hrMargin = newValue;
-      }
-      else {
-        this.variables.hrMargin = '0.3em 0 0.5em';
-      }
+    else if (parts.length === 2 && parts[0] === 'top') {
+      this.variables.hrMargin = `${parts[1]} ${bases.r} ${bases.b} ${bases.l}`
+    }
+    else if (parts.length === 2 && parts[0] === 'bottom') {
+      this.variables.hrMargin = `${bases.t} ${bases.r} ${parts[1]} ${bases.l}`
+    }
+    else if (newValue !== null && newValue !== undefined) {
+      this.variables.hrMargin = newValue;
+    }
+    else {
+      this.variables.hrMargin = base;
     }
   }
 
