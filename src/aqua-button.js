@@ -364,7 +364,7 @@ export class AquaButton extends WebComponentBase {
           position: relative;
           z-index: 2;
           transition: var(--button-hover-transition);
-r        }
+        }
 
         & .inner-chrome {
           display: flex;
