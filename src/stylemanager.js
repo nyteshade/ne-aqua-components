@@ -258,6 +258,9 @@ export class StyleManager {
    * }
    */
   getRuleSet(selector) {
+    if (!this.styleElement.isConnected)
+      return null
+
     for (let i = 0; i < this.styleElement.sheet.cssRules.length; i++) {
       const rule = this.styleElement.sheet.cssRules[i]
       if (rule.selectorText === selector) {
